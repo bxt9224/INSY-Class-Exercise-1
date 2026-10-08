@@ -1,0 +1,3779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BarberBook - Appointment Booking & Shop Management</title>
+  <style>
+    /* ==========================================================================
+       BARBERBOOK DESIGN SYSTEM & TOKENS
+       Warm, Understated Barber Shop Palette & Clean Typography
+       ========================================================================== */
+    :root {
+      --bg-page: #F7F5F0;
+      --bg-surface: #FFFFFF;
+      --bg-surface-hover: #FAF9F6;
+      --bg-surface-subtle: #F1EFEA;
+      
+      --text-primary: #202722;
+      --text-secondary: #5F6862;
+      --text-muted: #87918A;
+      
+      --accent-green: #244A3A;
+      --accent-green-hover: #1C3B2E;
+      --accent-green-subtle: rgba(36, 74, 58, 0.08);
+      
+      --accent-brass: #A58147;
+      --accent-brass-subtle: rgba(165, 129, 71, 0.12);
+      
+      --border-color: #DEDFD8;
+      --border-focus: #244A3A;
+      
+      --status-scheduled-bg: #EBF3FA;
+      --status-scheduled-text: #1E4E79;
+      --status-scheduled-border: #D2E3F3;
+      
+      --status-completed-bg: #EDF7F1;
+      --status-completed-text: #1B5E38;
+      --status-completed-border: #CFE9DB;
+      
+      --status-cancelled-bg: #FDF2F2;
+      --status-cancelled-text: #991B1B;
+      --status-cancelled-border: #F8D7DA;
+      
+      --status-noshow-bg: #FEF8EC;
+      --status-noshow-text: #92600E;
+      --status-noshow-border: #FBE5B9;
+      
+      --radius-sm: 8px;
+      --radius-md: 10px;
+      --radius-lg: 12px;
+      
+      --shadow-subtle: 0 1px 3px rgba(32, 39, 34, 0.05);
+      --shadow-card: 0 4px 12px rgba(32, 39, 34, 0.04);
+      --shadow-modal: 0 12px 28px rgba(32, 39, 34, 0.12);
+      
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Accessibility focus indicators */
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    /* Layout Container */
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* ==========================================================================
+       HEADER & TOP NAVIGATION
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      gap: 1rem;
+    }
+
+    .brand-wordmark {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand-wordmark h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--accent-brass);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-left: 1px solid var(--border-color);
+      padding-left: 0.75rem;
+      margin-left: 0.25rem;
+    }
+
+    /* Understated View Navigation Switcher */
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-surface-subtle);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .view-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.4rem 0.95rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      min-height: 34px;
+    }
+
+    .view-nav-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .view-nav-btn.active {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ==========================================================================
+       BUTTONS, FORMS & BADGES
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.92rem;
+      font-weight: 500;
+      font-family: inherit;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      border: 1px solid transparent;
+      min-height: 44px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-green);
+      color: #FFFFFF;
+      border-color: var(--accent-green);
+    }
+    .btn-primary:hover {
+      background-color: var(--accent-green-hover);
+      border-color: var(--accent-green-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    .btn-secondary:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: #CACBC3;
+    }
+
+    .btn-danger {
+      background-color: #FEF2F2;
+      color: #991B1B;
+      border-color: #F8D7DA;
+    }
+    .btn-danger:hover {
+      background-color: #FEE2E2;
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      min-height: 32px;
+      border-radius: 6px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .form-label {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: border-color 0.15s ease;
+      min-height: 44px;
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      outline: none;
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .form-error {
+      font-size: 0.82rem;
+      color: #B91C1C;
+      display: none;
+      margin-top: 0.25rem;
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      line-height: 1.2;
+    }
+    .badge-scheduled { background-color: var(--status-scheduled-bg); color: var(--status-scheduled-text); border-color: var(--status-scheduled-border); }
+    .badge-completed { background-color: var(--status-completed-bg); color: var(--status-completed-text); border-color: var(--status-completed-border); }
+    .badge-cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-text); border-color: var(--status-cancelled-border); }
+    .badge-noshow { background-color: var(--status-noshow-bg); color: var(--status-noshow-text); border-color: var(--status-noshow-border); }
+    .badge-active { background-color: #EDF7F1; color: #1B5E38; border-color: #CFE9DB; }
+    .badge-inactive { background-color: #F1EFEA; color: #5F6862; border-color: #DEDFD8; }
+
+    /* Number & Price Formatting */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       CLIENT BOOKING FLOW (TWO-COLUMN DESKTOP LAYOUT)
+       ========================================================================== */
+    .client-page-header {
+      padding: 2rem 0 1.5rem;
+    }
+
+    .client-page-header h2 {
+      font-size: 1.85rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .client-page-header p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 3rem;
+    }
+
+    .booking-main-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .booking-section {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 1. Services Selectable Rows */
+    .service-rows-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .service-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      gap: 0.85rem;
+      min-height: 52px;
+    }
+
+    .service-row-item:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: #CACBC3;
+    }
+
+    .service-row-item.selected {
+      border-color: var(--accent-green);
+      background-color: rgba(36, 74, 58, 0.03);
+    }
+
+    .service-radio-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s ease;
+    }
+
+    .service-row-item.selected .service-radio-indicator {
+      border-color: var(--accent-green);
+    }
+
+    .service-row-item.selected .service-radio-indicator::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+    }
+
+    .service-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .service-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .service-duration-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .service-price-tag {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    /* 2. Barber Selection Cards */
+    .barber-options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .barber-option-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      min-height: 58px;
+    }
+
+    .barber-option-card:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: #CACBC3;
+    }
+
+    .barber-option-card.selected {
+      border-color: var(--accent-green);
+      background-color: rgba(36, 74, 58, 0.03);
+    }
+
+    .barber-avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--bg-surface-subtle);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .barber-option-card.selected .barber-avatar-circle {
+      background-color: var(--accent-green-subtle);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .barber-option-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .barber-option-name {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .barber-option-shift {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    /* 3. Time Slots: Grouped Morning / Afternoon */
+    .time-period-group {
+      margin-top: 1rem;
+    }
+
+    .time-period-heading {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .time-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .time-slot-btn {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.55rem 0.4rem;
+      font-size: 0.88rem;
+      font-family: inherit;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time-slot-btn:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: #CACBC3;
+    }
+
+    .time-slot-btn.selected {
+      background-color: var(--accent-green);
+      color: #FFFFFF;
+      border-color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    /* 4. Sticky Summary Sidebar (Right Column) */
+    .booking-summary-col {
+      position: sticky;
+      top: 80px;
+    }
+
+    .summary-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .summary-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.15rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      gap: 0.5rem;
+    }
+
+    .summary-label {
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .summary-value {
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    .summary-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-total-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .summary-total-price {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Booking Confirmation View */
+    .confirmation-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 2rem;
+      max-width: 620px;
+      margin: 2rem auto;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .confirmation-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background-color: #EDF7F1;
+      border: 1px solid #CFE9DB;
+      color: #1B5E38;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+
+    /* Empty states */
+    .empty-state {
+      text-align: center;
+      padding: 2.25rem 1.5rem;
+      background-color: var(--bg-surface-hover);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin: 0.5rem 0;
+    }
+
+    /* ==========================================================================
+       OWNER VIEW LAYOUT & TABS
+       ========================================================================== */
+    .owner-tabs-nav {
+      display: flex;
+      gap: 0.25rem;
+      border-bottom: 1px solid var(--border-color);
+      margin: 1.25rem 0 1.75rem;
+      overflow-x: auto;
+      padding-bottom: 1px;
+    }
+
+    .owner-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+      min-height: 44px;
+    }
+
+    .owner-tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .owner-tab-btn.active {
+      color: var(--accent-green);
+      border-bottom-color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* KPI Metrics Summary Bar */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-tile {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 1.15rem;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .metric-tile-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-tile-val {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .metric-tile-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Daily Schedule Grouped by Barber */
+    .schedule-top-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .barber-columns-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .barber-roster-column {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .barber-roster-header {
+      background-color: var(--bg-surface-hover);
+      padding: 0.9rem 1.15rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .barber-roster-body {
+      padding: 0.9rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      min-height: 140px;
+    }
+
+    .appointment-item-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .appointment-item-card:hover {
+      border-color: #CACBC3;
+    }
+
+    .appointment-item-time {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+
+    .appointment-item-client {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .appointment-item-meta {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-subtle);
+      margin-bottom: 1.5rem;
+    }
+
+    .clean-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .clean-table th {
+      background-color: var(--bg-surface-subtle);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .clean-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+      color: var(--text-primary);
+    }
+
+    .clean-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .clean-table tr:hover td {
+      background-color: var(--bg-surface-hover);
+    }
+
+    /* Filtering Bar */
+    .filter-controls-row {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.75rem;
+      align-items: end;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    /* Monthly Performance Chart */
+    .chart-panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .chart-svg-box {
+      width: 100%;
+      height: 220px;
+      overflow: visible;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(32, 39, 34, 0.45);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-modal);
+      padding: 1.75rem;
+    }
+
+    .modal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-close-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .modal-close-icon-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-footer-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Days Checkbox Grid */
+    .days-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .day-select-btn {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.25rem;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .day-select-btn input {
+      accent-color: var(--accent-green);
+      cursor: pointer;
+    }
+
+    /* Toast Notification Container */
+    .toast-tray {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 400px;
+      width: calc(100% - 3rem);
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-modal);
+      border: 1px solid var(--border-color);
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      pointer-events: auto;
+      border-left: 4px solid var(--accent-green);
+    }
+
+    .toast-msg.error { border-left-color: #991B1B; }
+    .toast-msg.warning { border-left-color: #92600E; }
+
+    /* Discreet Footer */
+    .app-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      padding: 1.5rem 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 860px) {
+      .booking-layout {
+        grid-template-columns: 1fr;
+      }
+      .booking-summary-col {
+        position: static;
+      }
+      .header-content {
+        height: auto;
+        padding: 0.75rem 0;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .brand-subtitle {
+        display: none;
+      }
+      .view-switcher {
+        width: 100%;
+      }
+      .view-nav-btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       COMPACT HEADER WITH TEXT WORDMARK & UNDERSTATED NAVIGATION
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="container header-content">
+      <div class="brand-wordmark">
+        <h1>BarberBook <span class="brand-dot" aria-hidden="true"></span></h1>
+        <span class="brand-subtitle">Appointment & Staff Management</span>
+      </div>
+
+      <!-- Segmented View Navigation -->
+      <nav class="view-switcher" aria-label="Application View Switcher">
+        <button id="nav-btn-client" class="view-nav-btn active" onclick="switchMainView('client')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Book appointment
+        </button>
+        <button id="nav-btn-owner" class="view-nav-btn" onclick="switchMainView('owner')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          Owner portal
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Global Toast Notifications Tray -->
+  <div id="toast-tray" class="toast-tray" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       MAIN APP WORKSPACE
+       ======================================================================== -->
+  <main class="container" style="flex: 1; padding-top: 1rem; padding-bottom: 2.5rem;">
+
+    <!-- ======================================================================
+         VIEW 1: CLIENT BOOKING VIEW
+         ====================================================================== -->
+    <section id="view-client">
+      <div class="client-page-header">
+        <h2>Book an appointment</h2>
+        <p>Select a service, preferred barber, and time.</p>
+      </div>
+
+      <!-- Booking Flow (Two-Column Layout) -->
+      <div id="client-booking-flow" class="booking-layout">
+        
+        <!-- Main Column: Steps 1 to 4 -->
+        <div class="booking-main-col">
+          
+          <!-- Step 1: Services List -->
+          <div class="booking-section">
+            <div class="section-title">
+              <span>Choose a service</span>
+            </div>
+            <div id="service-rows-container" class="service-rows-list" role="radiogroup" aria-label="Services list">
+              <!-- Dynamically populated rows -->
+            </div>
+          </div>
+
+          <!-- Step 2: Preferred Barber Options -->
+          <div class="booking-section">
+            <div class="section-title">
+              <span>Choose a barber</span>
+            </div>
+            <div id="barber-options-container" class="barber-options-grid" role="radiogroup" aria-label="Barbers list">
+              <!-- Dynamically populated compact barber options -->
+            </div>
+          </div>
+
+          <!-- Step 3: Date Picker & 15-Minute Slot Generation -->
+          <div class="booking-section">
+            <div class="section-title">
+              <span>Select date & time</span>
+            </div>
+
+            <div class="form-group" style="max-width: 320px; margin-bottom: 1.25rem;">
+              <label for="client-date-picker" class="form-label">Appointment date</label>
+              <input 
+                type="date" 
+                id="client-date-picker" 
+                class="form-control" 
+                onchange="handleClientDateChange()" 
+              />
+              <span class="form-hint">Bookings available up to 30 days in advance.</span>
+              <span id="client-date-error" class="form-error"></span>
+            </div>
+
+            <!-- Grouped Time Slots (Morning & Afternoon) -->
+            <div id="time-slots-wrapper">
+              <div id="morning-slots-section" class="time-period-group" style="display: none;">
+                <div class="time-period-heading">Morning</div>
+                <div id="morning-slots-grid" class="time-slots-grid"></div>
+              </div>
+
+              <div id="afternoon-slots-section" class="time-period-group" style="display: none;">
+                <div class="time-period-heading">Afternoon</div>
+                <div id="afternoon-slots-grid" class="time-slots-grid"></div>
+              </div>
+
+              <div id="no-slots-message" class="empty-state" style="display: none;">
+                No appointments are available on this date. Please choose another day.
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Client Contact Information -->
+          <div class="booking-section">
+            <div class="section-title">
+              <span>Your details</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="client-input-name" class="form-label">Full name</label>
+                <input type="text" id="client-input-name" class="form-control" placeholder="Alex Morgan" />
+                <span id="client-name-error" class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label for="client-input-phone" class="form-label">Phone number</label>
+                <input type="tel" id="client-input-phone" class="form-control" placeholder="(555) 234-5678" />
+                <span id="client-phone-error" class="form-error"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Sticky Summary & Action -->
+        <div class="booking-summary-col">
+          <div class="summary-card">
+            <div class="summary-title">Appointment summary</div>
+            
+            <div class="summary-list">
+              <div class="summary-item">
+                <span class="summary-label">Service</span>
+                <span id="summary-val-service" class="summary-value">Select a service</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Barber</span>
+                <span id="summary-val-barber" class="summary-value">Any available barber</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Date</span>
+                <span id="summary-val-date" class="summary-value">Select date</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Time</span>
+                <span id="summary-val-time" class="summary-value tabular-nums">Select time</span>
+              </div>
+            </div>
+
+            <div class="summary-total-row">
+              <span class="summary-total-label">Total</span>
+              <span id="summary-val-price" class="summary-total-price tabular-nums">$0.00</span>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="width: 100%;" onclick="handleClientBookAppointment()">
+              Book appointment
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Confirmation Screen -->
+      <div id="client-confirmation-screen" class="confirmation-card" style="display: none;">
+        <div class="confirmation-icon-circle" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.45rem; font-weight: 600; margin-bottom: 0.35rem;">Appointment confirmed</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+          Your appointment has been added to the schedule.
+        </p>
+
+        <div class="summary-list" style="text-align: left; background-color: var(--bg-surface-subtle); padding: 1.15rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1.5rem;" id="confirmed-details-summary">
+          <!-- Injected dynamically -->
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="resetClientBookingView()">
+          Book another appointment
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         VIEW 2: SHOP OWNER PORTAL
+         ====================================================================== -->
+    <section id="view-owner" style="display: none;">
+      
+      <!-- Owner Portal Tab Navigation -->
+      <nav class="owner-tabs-nav" role="tablist" aria-label="Owner tabs">
+        <button class="owner-tab-btn active" id="btn-owner-tab-dashboard" onclick="switchOwnerTab('dashboard')" role="tab">
+          Daily schedule
+        </button>
+        <button class="owner-tab-btn" id="btn-owner-tab-appointments" onclick="switchOwnerTab('appointments')" role="tab">
+          Appointments
+        </button>
+        <button class="owner-tab-btn" id="btn-owner-tab-settings" onclick="switchOwnerTab('settings')" role="tab">
+          Barbers & services
+        </button>
+        <button class="owner-tab-btn" id="btn-owner-tab-performance" onclick="switchOwnerTab('performance')" role="tab">
+          Monthly performance
+        </button>
+        <button class="owner-tab-btn" id="btn-owner-tab-backups" onclick="switchOwnerTab('backups')" role="tab">
+          Data & backup
+        </button>
+      </nav>
+
+      <!-- --------------------------------------------------------------------
+           OWNER TAB 1: DASHBOARD & DAILY SCHEDULE
+           -------------------------------------------------------------------- -->
+      <div id="owner-panel-dashboard" class="tab-panel active" role="tabpanel">
+        
+        <!-- Compact Metrics Strip -->
+        <div class="metrics-bar">
+          <div class="metric-tile">
+            <div class="metric-tile-title">Today's bookings</div>
+            <div class="metric-tile-val" id="metric-today-total">0</div>
+            <div class="metric-tile-note">Scheduled & completed</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-tile-title">Available slots</div>
+            <div class="metric-tile-val" id="metric-today-available">0</div>
+            <div class="metric-tile-note">Remaining 30m slots today</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-tile-title">Completed today</div>
+            <div class="metric-tile-val" id="metric-today-completed">0</div>
+            <div class="metric-tile-note">Cuts completed</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-tile-title">Gross revenue today</div>
+            <div class="metric-tile-val" id="metric-today-revenue">$0.00</div>
+            <div class="metric-tile-note">Completed service value (not profit)</div>
+          </div>
+        </div>
+
+        <!-- Schedule Date Control & Barber Columns -->
+        <div class="schedule-top-toolbar">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">Schedule by barber</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Manage appointments for each team member.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="date" id="owner-schedule-date-picker" class="form-control" style="width: auto;" onchange="renderOwnerDashboard()" />
+            <button class="btn btn-secondary btn-sm" onclick="setDashboardScheduleToday()">Today</button>
+          </div>
+        </div>
+
+        <div id="barber-columns-wrapper" class="barber-columns-layout">
+          <!-- Dynamically populated barber schedule columns -->
+        </div>
+
+      </div>
+
+      <!-- --------------------------------------------------------------------
+           OWNER TAB 2: APPOINTMENTS TABLE
+           -------------------------------------------------------------------- -->
+      <div id="owner-panel-appointments" class="tab-panel" role="tabpanel">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">All client appointments</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Filter, edit, reschedule, or cancel bookings.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateAppointmentModal()">
+            + New appointment
+          </button>
+        </div>
+
+        <!-- Filtering toolbar -->
+        <div class="filter-controls-row">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="filter-input-search" class="form-label">Client name</label>
+            <input type="text" id="filter-input-search" class="form-control" placeholder="Search name..." oninput="renderAppointmentsTable()" />
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="filter-select-barber" class="form-label">Barber</label>
+            <select id="filter-select-barber" class="form-control" onchange="renderAppointmentsTable()">
+              <option value="ALL">All barbers</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="filter-select-status" class="form-label">Status</label>
+            <select id="filter-select-status" class="form-control" onchange="renderAppointmentsTable()">
+              <option value="ALL">All statuses</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="No-show">No-show</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="filter-input-date" class="form-label">Date</label>
+            <input type="date" id="filter-input-date" class="form-control" onchange="renderAppointmentsTable()" />
+          </div>
+          <div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="resetAppointmentFilters()">Reset</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Date & time</th>
+                <th>Client</th>
+                <th>Barber</th>
+                <th>Service & price</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appointments-tbody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- --------------------------------------------------------------------
+           OWNER TAB 3: BARBERS & SERVICE SETTINGS
+           -------------------------------------------------------------------- -->
+      <div id="owner-panel-settings" class="tab-panel" role="tabpanel">
+        
+        <!-- Barbers Roster -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">Barber staff roster</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Configure shifts, working days, breaks, and active status.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddBarberModal()">+ Add barber</button>
+        </div>
+
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Barber name</th>
+                <th>Status</th>
+                <th>Working days</th>
+                <th>Shift hours</th>
+                <th>Lunch break</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="barbers-settings-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Services Menu -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">Services & pricing</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Manage haircut options. Changing rates does not alter existing booked appointments.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddServiceModal()">+ Add service</button>
+        </div>
+
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Service name</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="services-settings-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- --------------------------------------------------------------------
+           OWNER TAB 4: MONTHLY PERFORMANCE
+           -------------------------------------------------------------------- -->
+      <div id="owner-panel-performance" class="tab-panel" role="tabpanel">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">Monthly employee performance</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Review completed cuts, cancellations, and gross revenues.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label for="perf-month-picker" class="form-label" style="margin-bottom: 0;">Month:</label>
+            <input type="month" id="perf-month-picker" class="form-control" style="width: auto;" onchange="renderMonthlyPerformance()" />
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          Note: Revenue reflects gross completed service totals only. It does not represent net profit and excludes cancellations and no-shows.
+        </div>
+
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Barber</th>
+                <th>Completed</th>
+                <th>Cancelled</th>
+                <th>No-show</th>
+                <th>Total service time</th>
+                <th style="text-align: right;">Gross revenue</th>
+              </tr>
+            </thead>
+            <tbody id="performance-table-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Inline SVG Performance Comparison Chart -->
+        <div class="chart-panel">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+            <h4 style="font-size: 1rem; font-weight: 600;">Gross revenue comparison</h4>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">Completed appointment revenue by barber</span>
+          </div>
+          <div id="perf-svg-chart-container">
+            <!-- Inline SVG chart rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- --------------------------------------------------------------------
+           OWNER TAB 5: DATA MANAGEMENT & BACKUPS
+           -------------------------------------------------------------------- -->
+      <div id="owner-panel-backups" class="tab-panel" role="tabpanel">
+        
+        <div style="max-width: 680px;">
+          <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.35rem;">Backup & data tools</h3>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.75rem;">
+            Export records to JSON, restore backups, or load realistic sample shop data for demonstration.
+          </p>
+
+          <!-- Demo Data Card -->
+          <div class="booking-section" style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Load sample demo data</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Populates 3 barbers, 5 services, and realistic appointments (past, today, and future relative to your current date).
+            </p>
+            <button class="btn btn-secondary" onclick="confirmLoadDemoData()">
+              Load sample demo data
+            </button>
+          </div>
+
+          <!-- JSON Export/Import Card -->
+          <div class="booking-section" style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Export / Import backup file</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Save your current shop database to a local JSON file or import a verified backup file.
+            </p>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="exportDataToJson()">
+                Export backup (JSON)
+              </button>
+              <label class="btn btn-secondary" style="cursor: pointer; margin-bottom: 0;">
+                Import backup file
+                <input type="file" id="import-json-file-input" accept=".json" style="display: none;" onchange="handleImportJsonFile(event)" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Reset Store Card -->
+          <div class="booking-section" style="border-color: #F8D7DA;">
+            <h4 style="font-size: 1rem; font-weight: 600; color: #991B1B; margin-bottom: 0.25rem;">Reset shop data</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Clears all saved appointments, barbers, and service settings from this browser.
+            </p>
+            <button class="btn btn-danger" onclick="confirmResetAllData()">
+              Reset all data
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODALS: APPOINTMENT, BARBER, SERVICE & CONFIRMATION
+       ======================================================================== -->
+
+  <!-- Modal: Appointment Form (Create or Edit) -->
+  <div id="modal-appt" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-appt-heading">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 id="modal-appt-heading" style="font-size: 1.15rem; font-weight: 600;">Create appointment</h3>
+        <button class="modal-close-icon-btn" onclick="closeAppointmentModal()" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-appt-modal" onsubmit="handleSaveAppointmentModal(event)">
+        <input type="hidden" id="modal-field-appt-id" value="" />
+
+        <div class="form-group">
+          <label for="modal-field-client-name" class="form-label">Client name *</label>
+          <input type="text" id="modal-field-client-name" class="form-control" required placeholder="Jordan Smith" />
+        </div>
+
+        <div class="form-group">
+          <label for="modal-field-client-phone" class="form-label">Client phone *</label>
+          <input type="tel" id="modal-field-client-phone" class="form-control" required placeholder="(555) 987-6543" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-field-service" class="form-label">Service *</label>
+            <select id="modal-field-service" class="form-control" required onchange="handleModalServiceChange()">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modal-field-barber" class="form-label">Barber *</label>
+            <select id="modal-field-barber" class="form-control" required onchange="handleModalBarberOrDateChange()">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-field-date" class="form-label">Date *</label>
+            <input type="date" id="modal-field-date" class="form-control" required onchange="handleModalBarberOrDateChange()" />
+          </div>
+          <div class="form-group">
+            <label for="modal-field-time" class="form-label">Start time slot *</label>
+            <select id="modal-field-time" class="form-control" required>
+              <option value="">Select date & barber first</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="modal-field-status-group" style="display: none;">
+          <label for="modal-field-status" class="form-label">Status</label>
+          <select id="modal-field-status" class="form-control">
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="No-show">No-show</option>
+          </select>
+        </div>
+
+        <div id="modal-appt-conflict-msg" style="display: none; padding: 0.65rem 0.85rem; background-color: #FEF2F2; border: 1px solid #F8D7DA; border-radius: var(--radius-sm); font-size: 0.82rem; color: #991B1B; margin-bottom: 1rem;">
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn btn-secondary" onclick="closeAppointmentModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-btn-save-appt">Save appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Barber Add / Edit -->
+  <div id="modal-barber" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-barber-heading">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 id="modal-barber-heading" style="font-size: 1.15rem; font-weight: 600;">Add barber</h3>
+        <button class="modal-close-icon-btn" onclick="closeBarberModal()" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-barber-modal" onsubmit="handleSaveBarberModal(event)">
+        <input type="hidden" id="modal-field-barber-id" value="" />
+
+        <div class="form-group">
+          <label for="modal-field-barber-name" class="form-label">Barber full name *</label>
+          <input type="text" id="modal-field-barber-name" class="form-control" required placeholder="Leo Ramirez" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Working days</label>
+          <div class="days-select-grid">
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="0"> Sun</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="1"> Mon</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="2"> Tue</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="3"> Wed</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="4"> Thu</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="5"> Fri</label>
+            <label class="day-select-btn"><input type="checkbox" name="workday" value="6"> Sat</label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-field-barber-start" class="form-label">Shift start time *</label>
+            <input type="time" id="modal-field-barber-start" class="form-control" required value="09:00" />
+          </div>
+          <div class="form-group">
+            <label for="modal-field-barber-end" class="form-label">Shift end time *</label>
+            <input type="time" id="modal-field-barber-end" class="form-control" required value="17:00" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-field-barber-bstart" class="form-label">Break start</label>
+            <input type="time" id="modal-field-barber-bstart" class="form-control" value="12:00" />
+          </div>
+          <div class="form-group">
+            <label for="modal-field-barber-bend" class="form-label">Break end</label>
+            <input type="time" id="modal-field-barber-bend" class="form-control" value="13:00" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
+            <input type="checkbox" id="modal-field-barber-active" checked style="accent-color: var(--accent-green); width: 16px; height: 16px;" />
+            <span>Active for new client bookings</span>
+          </label>
+          <span class="form-hint">Inactive barbers cannot receive new bookings, but historical reports remain intact.</span>
+        </div>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn btn-secondary" onclick="closeBarberModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save barber</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Service Add / Edit -->
+  <div id="modal-service" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-service-heading">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 id="modal-service-heading" style="font-size: 1.15rem; font-weight: 600;">Add service</h3>
+        <button class="modal-close-icon-btn" onclick="closeServiceModal()" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-service-modal" onsubmit="handleSaveServiceModal(event)">
+        <input type="hidden" id="modal-field-service-id" value="" />
+
+        <div class="form-group">
+          <label for="modal-field-service-name" class="form-label">Service name *</label>
+          <input type="text" id="modal-field-service-name" class="form-control" required placeholder="Classic Haircut" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-field-service-duration" class="form-label">Duration (minutes) *</label>
+            <select id="modal-field-service-duration" class="form-control" required>
+              <option value="15">15 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+              <option value="75">75 minutes</option>
+              <option value="90">90 minutes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modal-field-service-price" class="form-label">Price ($ USD) *</label>
+            <input type="number" id="modal-field-service-price" class="form-control" required min="0" step="0.5" placeholder="35.00" />
+          </div>
+        </div>
+
+        <span class="form-hint" style="display: block; margin-bottom: 0.5rem;">
+          Rate updates apply to new bookings. Existing appointments retain their original price.
+        </span>
+
+        <div class="modal-footer-row">
+          <button type="button" class="btn btn-secondary" onclick="closeServiceModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Dialog -->
+  <div id="modal-confirm" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-heading">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header-row">
+        <h3 id="modal-confirm-heading" style="font-size: 1.15rem; font-weight: 600;">Confirm action</h3>
+        <button class="modal-close-icon-btn" onclick="closeConfirmModal()" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <p id="modal-confirm-msg" style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Are you sure you want to proceed?
+      </p>
+      <div class="modal-footer-row">
+        <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="modal-confirm-proceed-btn">Proceed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       DISCREET FOOTER & STORAGE STATUS
+       ======================================================================== -->
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <div>
+        <span>BarberBook</span> &bull; 
+        <span>Local prototype for barber shop scheduling. Data remains in this browser.</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span id="storage-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background-color: #10B981; display: inline-block;"></span>
+        <span id="storage-status-text" style="color: var(--text-secondary);">Saved locally</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       APPLICATION JAVASCRIPT LOGIC
+       Full Preservation of Booking Engine, Conflict Math & Storage
+       ======================================================================== -->
+  <script>
+    /**
+     * BARBERBOOK LOGIC ENGINE
+     * 
+     * Key Components:
+     * - Date bounds: local calendar math, [today, today + 30 days] inclusive.
+     * - 15-minute start time slots with full-duration collision detection.
+     * - Reactive Client & Owner View state synchronization.
+     * - Snapshot preservation for historical rates.
+     */
+
+    const STORAGE_KEY = 'barberbook_data_v1';
+    let isStorageAvailable = true;
+    let inMemoryStore = null;
+
+    let appState = {
+      barbers: [],
+      services: [],
+      appointments: []
+    };
+
+    // Client flow selection
+    let clientSelection = {
+      serviceId: null,
+      barberId: 'ANY', // 'ANY' or specific barber ID
+      date: '',
+      timeSlot: null
+    };
+
+    let confirmCallback = null;
+
+    /* --------------------------------------------------------------------------
+       1. DATE & TIME UTILITY FUNCTIONS
+       -------------------------------------------------------------------------- */
+
+    /**
+     * Formats Date object as local YYYY-MM-DD string without UTC offset shifts
+     */
+    function formatLocalDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Computes the 30-day booking window [today, today + 30 days]
+     */
+    function getBookingDateRange() {
+      const today = new Date();
+      const minDateStr = formatLocalDate(today);
+      const maxDateObj = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
+      const maxDateStr = formatLocalDate(maxDateObj);
+      return { minDateStr, maxDateStr };
+    }
+
+    /**
+     * Converts "HH:MM" 24h string to minutes from midnight
+     */
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return (h * 60) + m;
+    }
+
+    /**
+     * Converts minutes from midnight to "HH:MM" 24h string
+     */
+    function minutesToTime(mins) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    /**
+     * Formats "HH:MM" to 12-hour AM/PM string
+     */
+    function formatTime12h(timeStr) {
+      if (!timeStr) return '--';
+      const [hours24, minutes] = timeStr.split(':').map(Number);
+      const period = hours24 >= 12 ? 'PM' : 'AM';
+      const hours12 = hours24 % 12 || 12;
+      return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+    }
+
+    /**
+     * Formats YYYY-MM-DD into readable friendly date
+     */
+    function formatDateFriendly(dateStr) {
+      if (!dateStr) return '--';
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      return dateObj.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    /**
+     * Returns 0 (Sun) - 6 (Sat)
+     */
+    function getDayOfWeek(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d).getDay();
+    }
+
+    /**
+     * Formats currency with tabular alignment
+     */
+    function formatCurrency(num) {
+      const val = Number(num) || 0;
+      return '$' + val.toFixed(2);
+    }
+
+    /**
+     * Generates initials for barber avatar
+     */
+    function getInitials(name) {
+      if (!name) return 'B';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    /* --------------------------------------------------------------------------
+       2. STORAGE ADAPTER & SAMPLE DATA
+       -------------------------------------------------------------------------- */
+
+    function saveState() {
+      try {
+        if (isStorageAvailable) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        } else {
+          inMemoryStore = JSON.parse(JSON.stringify(appState));
+        }
+      } catch (err) {
+        console.warn('Storage save failed, using memory store fallback', err);
+        isStorageAvailable = false;
+        inMemoryStore = JSON.parse(JSON.stringify(appState));
+        updateStorageStatusIndicator();
+        showToast('Browser storage is restricted. Changes will not survive reload.', 'warning');
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.barbers) && Array.isArray(parsed.services) && Array.isArray(parsed.appointments)) {
+            appState = parsed;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not read localStorage', err);
+        isStorageAvailable = false;
+        updateStorageStatusIndicator();
+      }
+
+      initDefaultData();
+    }
+
+    function updateStorageStatusIndicator() {
+      const dot = document.getElementById('storage-status-dot');
+      const text = document.getElementById('storage-status-text');
+      if (!dot || !text) return;
+
+      if (isStorageAvailable) {
+        dot.style.backgroundColor = '#10B981';
+        text.textContent = 'Saved locally';
+      } else {
+        dot.style.backgroundColor = '#F59E0B';
+        text.textContent = 'Session memory only';
+      }
+    }
+
+    function initDefaultData() {
+      const today = new Date();
+      const todayStr = formatLocalDate(today);
+      
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      const yesterdayStr = formatLocalDate(yesterday);
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const tomorrowStr = formatLocalDate(tomorrow);
+
+      const dayAfter = new Date(today);
+      dayAfter.setDate(today.getDate() + 2);
+      const dayAfterStr = formatLocalDate(dayAfter);
+
+      const pastWeek = new Date(today);
+      pastWeek.setDate(today.getDate() - 6);
+      const pastWeekStr = formatLocalDate(pastWeek);
+
+      appState = {
+        barbers: [
+          {
+            id: 'b1',
+            name: 'Marcus Vance',
+            active: true,
+            workDays: [1, 2, 3, 4, 5, 6], // Mon - Sat
+            startTime: '09:00',
+            endTime: '17:00',
+            breakStart: '12:00',
+            breakEnd: '13:00'
+          },
+          {
+            id: 'b2',
+            name: 'Leo Ramirez',
+            active: true,
+            workDays: [2, 3, 4, 5, 6, 0], // Tue - Sun
+            startTime: '10:00',
+            endTime: '18:00',
+            breakStart: '13:00',
+            breakEnd: '14:00'
+          },
+          {
+            id: 'b3',
+            name: 'Sophia Chen',
+            active: true,
+            workDays: [1, 2, 3, 4, 5], // Mon - Fri
+            startTime: '08:30',
+            endTime: '16:30',
+            breakStart: '12:30',
+            breakEnd: '13:30'
+          }
+        ],
+        services: [
+          { id: 's1', name: 'Classic Haircut', duration: 30, price: 35.00 },
+          { id: 's2', name: 'Beard Trim & Lineup', duration: 30, price: 25.00 },
+          { id: 's3', name: 'Signature Haircut & Beard Combo', duration: 60, price: 55.00 },
+          { id: 's4', name: 'Hot Towel Deluxe Shave', duration: 45, price: 40.00 },
+          { id: 's5', name: 'Junior / Senior Haircut', duration: 30, price: 28.00 }
+        ],
+        appointments: [
+          {
+            id: 'apt-101',
+            clientName: 'Julian Brooks',
+            clientPhone: '(555) 234-5678',
+            barberId: 'b1',
+            serviceId: 's1',
+            serviceName: 'Classic Haircut',
+            price: 35.00,
+            duration: 30,
+            date: pastWeekStr,
+            startTime: '10:00',
+            endTime: '10:30',
+            status: 'Completed',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-102',
+            clientName: 'Daniel Craig',
+            clientPhone: '(555) 345-6789',
+            barberId: 'b2',
+            serviceId: 's3',
+            serviceName: 'Signature Haircut & Beard Combo',
+            price: 55.00,
+            duration: 60,
+            date: pastWeekStr,
+            startTime: '11:00',
+            endTime: '12:00',
+            status: 'Completed',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-103',
+            clientName: 'Kevin Hart',
+            clientPhone: '(555) 456-7890',
+            barberId: 'b3',
+            serviceId: 's4',
+            serviceName: 'Hot Towel Deluxe Shave',
+            price: 40.00,
+            duration: 45,
+            date: yesterdayStr,
+            startTime: '14:00',
+            endTime: '14:45',
+            status: 'Completed',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-104',
+            clientName: 'Chris Evans',
+            clientPhone: '(555) 678-9012',
+            barberId: 'b2',
+            serviceId: 's1',
+            serviceName: 'Classic Haircut',
+            price: 35.00,
+            duration: 30,
+            date: yesterdayStr,
+            startTime: '15:00',
+            endTime: '15:30',
+            status: 'No-show',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-105',
+            clientName: 'Michael B. Jordan',
+            clientPhone: '(555) 789-0123',
+            barberId: 'b1',
+            serviceId: 's3',
+            serviceName: 'Signature Haircut & Beard Combo',
+            price: 55.00,
+            duration: 60,
+            date: todayStr,
+            startTime: '09:30',
+            endTime: '10:30',
+            status: 'Completed',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-106',
+            clientName: 'Ryan Reynolds',
+            clientPhone: '(555) 890-1234',
+            barberId: 'b3',
+            serviceId: 's1',
+            serviceName: 'Classic Haircut',
+            price: 35.00,
+            duration: 30,
+            date: todayStr,
+            startTime: '10:00',
+            endTime: '10:30',
+            status: 'Completed',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-107',
+            clientName: 'Anthony Davis',
+            clientPhone: '(555) 901-2345',
+            barberId: 'b2',
+            serviceId: 's4',
+            serviceName: 'Hot Towel Deluxe Shave',
+            price: 40.00,
+            duration: 45,
+            date: todayStr,
+            startTime: '15:00',
+            endTime: '15:45',
+            status: 'Scheduled',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-108',
+            clientName: 'Oscar Isaac',
+            clientPhone: '(555) 111-2222',
+            barberId: 'b1',
+            serviceId: 's1',
+            serviceName: 'Classic Haircut',
+            price: 35.00,
+            duration: 30,
+            date: tomorrowStr,
+            startTime: '10:00',
+            endTime: '10:30',
+            status: 'Scheduled',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'apt-109',
+            clientName: 'Idris Elba',
+            clientPhone: '(555) 333-4444',
+            barberId: 'b2',
+            serviceId: 's3',
+            serviceName: 'Signature Haircut & Beard Combo',
+            price: 55.00,
+            duration: 60,
+            date: dayAfterStr,
+            startTime: '11:00',
+            endTime: '12:00',
+            status: 'Scheduled',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      };
+
+      saveState();
+    }
+
+    /* --------------------------------------------------------------------------
+       3. 15-MINUTE SLOT GENERATION & COLLISION CHECKING
+       Strictly Enforcing:
+       - 15-minute start steps
+       - Working day check
+       - Shift hours & break exclusion
+       - Past time exclusion for today
+       - Collision formula: slotStart < apptEnd && slotEnd > apptStart
+       - Cancelled & No-shows do not block
+       -------------------------------------------------------------------------- */
+
+    function isSlotAvailable(barberId, dateStr, startTimeStr, serviceDuration, excludeApptId = null) {
+      const barber = appState.barbers.find(b => b.id === barberId);
+      if (!barber || !barber.active) return false;
+
+      // 1. Working Day Check
+      const dayOfWeek = getDayOfWeek(dateStr);
+      if (!barber.workDays.includes(dayOfWeek)) return false;
+
+      const slotStart = timeToMinutes(startTimeStr);
+      const slotEnd = slotStart + serviceDuration;
+
+      // 2. Shift Bounds Check
+      const shiftStart = timeToMinutes(barber.startTime);
+      const shiftEnd = timeToMinutes(barber.endTime);
+      if (slotStart < shiftStart || slotEnd > shiftEnd) return false;
+
+      // 3. Lunch Break Check
+      if (barber.breakStart && barber.breakEnd) {
+        const breakStart = timeToMinutes(barber.breakStart);
+        const breakEnd = timeToMinutes(barber.breakEnd);
+        if (slotStart < breakEnd && slotEnd > breakStart) {
+          return false;
+        }
+      }
+
+      // 4. Past Date & Local Time Check
+      const now = new Date();
+      const todayStr = formatLocalDate(now);
+      if (dateStr < todayStr) return false;
+      if (dateStr === todayStr) {
+        const currentLocalMinutes = now.getHours() * 60 + now.getMinutes();
+        if (slotStart <= currentLocalMinutes) return false;
+      }
+
+      // 5. Existing Active Appointments Check
+      const activeAppts = appState.appointments.filter(appt => {
+        if (appt.barberId !== barberId) return false;
+        if (appt.date !== dateStr) return false;
+        if (excludeApptId && appt.id === excludeApptId) return false;
+        return appt.status === 'Scheduled' || appt.status === 'Completed';
+      });
+
+      for (const appt of activeAppts) {
+        const apptStart = timeToMinutes(appt.startTime);
+        const apptEnd = timeToMinutes(appt.endTime);
+        if (slotStart < apptEnd && slotEnd > apptStart) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function getAvailableSlotsForBarber(barberId, dateStr, serviceDuration, excludeApptId = null) {
+      const barber = appState.barbers.find(b => b.id === barberId);
+      if (!barber || !barber.active) return [];
+
+      const dayOfWeek = getDayOfWeek(dateStr);
+      if (!barber.workDays.includes(dayOfWeek)) return [];
+
+      const shiftStart = timeToMinutes(barber.startTime);
+      const shiftEnd = timeToMinutes(barber.endTime);
+      const slots = [];
+
+      for (let time = shiftStart; time + serviceDuration <= shiftEnd; time += 15) {
+        const timeStr = minutesToTime(time);
+        if (isSlotAvailable(barberId, dateStr, timeStr, serviceDuration, excludeApptId)) {
+          slots.push(timeStr);
+        }
+      }
+
+      return slots;
+    }
+
+    function getAvailableSlotsForAnyBarber(dateStr, serviceDuration, excludeApptId = null) {
+      const activeBarbers = appState.barbers.filter(b => b.active);
+      const slotMap = new Map();
+
+      activeBarbers.forEach(barber => {
+        const slots = getAvailableSlotsForBarber(barber.id, dateStr, serviceDuration, excludeApptId);
+        slots.forEach(slot => {
+          if (!slotMap.has(slot)) {
+            slotMap.set(slot, []);
+          }
+          slotMap.get(slot).push(barber.id);
+        });
+      });
+
+      const sortedSlots = Array.from(slotMap.keys()).sort((a, b) => timeToMinutes(a) - timeToMinutes(b));
+      return { sortedSlots, slotMap };
+    }
+
+    /* --------------------------------------------------------------------------
+       4. CLIENT BOOKING VIEW CONTROLLER
+       -------------------------------------------------------------------------- */
+
+    function initClientBookingFlow() {
+      const { minDateStr, maxDateStr } = getBookingDateRange();
+
+      const datePicker = document.getElementById('client-date-picker');
+      if (datePicker) {
+        datePicker.min = minDateStr;
+        datePicker.max = maxDateStr;
+
+        // Default to today if date is empty or out of range
+        if (!clientSelection.date || clientSelection.date < minDateStr || clientSelection.date > maxDateStr) {
+          clientSelection.date = minDateStr;
+        }
+        datePicker.value = clientSelection.date;
+      }
+
+      // Auto-select first service if none selected
+      if (!clientSelection.serviceId && appState.services.length > 0) {
+        clientSelection.serviceId = appState.services[0].id;
+      }
+
+      renderClientServices();
+      renderClientBarbers();
+      recalculateClientTimeSlots();
+      updateClientSummary();
+    }
+
+    function renderClientServices() {
+      const container = document.getElementById('service-rows-container');
+      if (!container) return;
+
+      if (appState.services.length === 0) {
+        container.innerHTML = `<div class="empty-state">No services currently offered.</div>`;
+        return;
+      }
+
+      container.innerHTML = appState.services.map(svc => {
+        const isSelected = clientSelection.serviceId === svc.id;
+        return `
+          <div 
+            class="service-row-item ${isSelected ? 'selected' : ''}" 
+            role="radio" 
+            aria-checked="${isSelected}" 
+            tabindex="0"
+            onclick="selectClientService('${svc.id}')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectClientService('${svc.id}');}"
+          >
+            <div class="service-radio-indicator" aria-hidden="true"></div>
+            <div class="service-info">
+              <span class="service-title">${escapeHtml(svc.name)}</span>
+              <span class="service-duration-label">${svc.duration} min appointment</span>
+            </div>
+            <span class="service-price-tag">${formatCurrency(svc.price)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectClientService(serviceId) {
+      if (clientSelection.serviceId !== serviceId) {
+        clientSelection.serviceId = serviceId;
+        renderClientServices();
+        recalculateClientTimeSlots();
+        updateClientSummary();
+      }
+    }
+
+    function renderClientBarbers() {
+      const container = document.getElementById('barber-options-container');
+      if (!container) return;
+
+      const activeBarbers = appState.barbers.filter(b => b.active);
+
+      let html = `
+        <div 
+          class="barber-option-card ${clientSelection.barberId === 'ANY' ? 'selected' : ''}"
+          role="radio"
+          aria-checked="${clientSelection.barberId === 'ANY'}"
+          tabindex="0"
+          onclick="selectClientBarber('ANY')"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectClientBarber('ANY');}"
+        >
+          <div class="barber-avatar-circle" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="barber-option-meta">
+            <div class="barber-option-name">Any available barber</div>
+            <div class="barber-option-shift">First free team member</div>
+          </div>
+        </div>
+      `;
+
+      html += activeBarbers.map(b => {
+        const isSelected = clientSelection.barberId === b.id;
+        const initials = getInitials(b.name);
+        const shiftStr = `${formatTime12h(b.startTime)} – ${formatTime12h(b.endTime)}`;
+        return `
+          <div 
+            class="barber-option-card ${isSelected ? 'selected' : ''}"
+            role="radio"
+            aria-checked="${isSelected}"
+            tabindex="0"
+            onclick="selectClientBarber('${b.id}')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectClientBarber('${b.id}');}"
+          >
+            <div class="barber-avatar-circle" aria-hidden="true">${initials}</div>
+            <div class="barber-option-meta">
+              <div class="barber-option-name">${escapeHtml(b.name)}</div>
+              <div class="barber-option-shift">${shiftStr}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    function selectClientBarber(barberId) {
+      if (clientSelection.barberId !== barberId) {
+        clientSelection.barberId = barberId;
+        renderClientBarbers();
+        recalculateClientTimeSlots();
+        updateClientSummary();
+      }
+    }
+
+    function handleClientDateChange() {
+      const dateInput = document.getElementById('client-date-picker');
+      const errorEl = document.getElementById('client-date-error');
+      if (errorEl) errorEl.classList.remove('visible');
+
+      const { minDateStr, maxDateStr } = getBookingDateRange();
+
+      if (dateInput && dateInput.value) {
+        const val = dateInput.value;
+        if (val < minDateStr || val > maxDateStr) {
+          if (errorEl) {
+            errorEl.textContent = 'Please choose a date between today and 30 days from today.';
+            errorEl.classList.add('visible');
+          }
+          clientSelection.date = minDateStr;
+          dateInput.value = minDateStr;
+        } else {
+          clientSelection.date = val;
+        }
+      }
+
+      recalculateClientTimeSlots();
+      updateClientSummary();
+    }
+
+    /**
+     * Recalculates availability and clears previously selected time slot if no longer valid
+     */
+    function recalculateClientTimeSlots() {
+      const morningSec = document.getElementById('morning-slots-section');
+      const afternoonSec = document.getElementById('afternoon-slots-section');
+      const morningGrid = document.getElementById('morning-slots-grid');
+      const afternoonGrid = document.getElementById('afternoon-slots-grid');
+      const noSlotsMsg = document.getElementById('no-slots-message');
+
+      const service = appState.services.find(s => s.id === clientSelection.serviceId);
+      if (!service || !clientSelection.date) {
+        morningSec.style.display = 'none';
+        afternoonSec.style.display = 'none';
+        noSlotsMsg.style.display = 'block';
+        noSlotsMsg.textContent = 'Please select a service and date.';
+        clientSelection.timeSlot = null;
+        return;
+      }
+
+      let availableSlots = [];
+
+      if (clientSelection.barberId === 'ANY') {
+        const { sortedSlots } = getAvailableSlotsForAnyBarber(clientSelection.date, service.duration);
+        availableSlots = sortedSlots;
+      } else {
+        availableSlots = getAvailableSlotsForBarber(clientSelection.barberId, clientSelection.date, service.duration);
+      }
+
+      // Requirement: clear selected time that is no longer valid
+      if (clientSelection.timeSlot && !availableSlots.includes(clientSelection.timeSlot)) {
+        clientSelection.timeSlot = null;
+      }
+
+      if (availableSlots.length === 0) {
+        morningSec.style.display = 'none';
+        afternoonSec.style.display = 'none';
+        noSlotsMsg.style.display = 'block';
+        // Exact specified error message:
+        noSlotsMsg.textContent = 'No appointments are available on this date. Please choose another day.';
+        return;
+      }
+
+      noSlotsMsg.style.display = 'none';
+
+      // Split into Morning (< 12:00) and Afternoon (>= 12:00)
+      const morningSlots = availableSlots.filter(t => timeToMinutes(t) < 720);
+      const afternoonSlots = availableSlots.filter(t => timeToMinutes(t) >= 720);
+
+      // Morning render
+      if (morningSlots.length > 0) {
+        morningSec.style.display = 'block';
+        morningGrid.innerHTML = morningSlots.map(t => {
+          const isSelected = clientSelection.timeSlot === t;
+          return `
+            <button 
+              type="button" 
+              class="time-slot-btn ${isSelected ? 'selected' : ''}"
+              onclick="selectClientTimeSlot('${t}')"
+            >
+              ${formatTime12h(t)}
+            </button>
+          `;
+        }).join('');
+      } else {
+        morningSec.style.display = 'none';
+      }
+
+      // Afternoon render
+      if (afternoonSlots.length > 0) {
+        afternoonSec.style.display = 'block';
+        afternoonGrid.innerHTML = afternoonSlots.map(t => {
+          const isSelected = clientSelection.timeSlot === t;
+          return `
+            <button 
+              type="button" 
+              class="time-slot-btn ${isSelected ? 'selected' : ''}"
+              onclick="selectClientTimeSlot('${t}')"
+            >
+              ${formatTime12h(t)}
+            </button>
+          `;
+        }).join('');
+      } else {
+        afternoonSec.style.display = 'none';
+      }
+    }
+
+    function selectClientTimeSlot(timeStr) {
+      clientSelection.timeSlot = timeStr;
+      recalculateClientTimeSlots();
+      updateClientSummary();
+    }
+
+    function updateClientSummary() {
+      const service = appState.services.find(s => s.id === clientSelection.serviceId);
+      const barber = appState.barbers.find(b => b.id === clientSelection.barberId);
+
+      // Service line
+      document.getElementById('summary-val-service').textContent = service 
+        ? `${service.name} (${service.duration} min)` 
+        : 'Select a service';
+
+      // Barber line
+      document.getElementById('summary-val-barber').textContent = clientSelection.barberId === 'ANY'
+        ? 'Any available barber'
+        : (barber ? barber.name : 'Select a barber');
+
+      // Date line
+      document.getElementById('summary-val-date').textContent = clientSelection.date 
+        ? formatDateFriendly(clientSelection.date) 
+        : 'Select date';
+
+      // Time window line
+      if (service && clientSelection.timeSlot) {
+        const startMins = timeToMinutes(clientSelection.timeSlot);
+        const endMins = startMins + service.duration;
+        const endTimeStr = minutesToTime(endMins);
+        document.getElementById('summary-val-time').textContent = 
+          `${formatTime12h(clientSelection.timeSlot)} – ${formatTime12h(endTimeStr)}`;
+      } else {
+        document.getElementById('summary-val-time').textContent = 'Select time';
+      }
+
+      // Price line
+      document.getElementById('summary-val-price').textContent = service 
+        ? formatCurrency(service.price) 
+        : '$0.00';
+    }
+
+    /**
+     * Confirms client booking with strict pre-save date and collision verification
+     */
+    function handleClientBookAppointment() {
+      // Clear previous inline errors
+      const nameError = document.getElementById('client-name-error');
+      const phoneError = document.getElementById('client-phone-error');
+      const dateError = document.getElementById('client-date-error');
+
+      if (nameError) nameError.classList.remove('visible');
+      if (phoneError) phoneError.classList.remove('visible');
+      if (dateError) dateError.classList.remove('visible');
+
+      const nameInput = document.getElementById('client-input-name');
+      const phoneInput = document.getElementById('client-input-phone');
+      const dateInput = document.getElementById('client-date-picker');
+
+      const clientName = nameInput ? nameInput.value.trim() : '';
+      const clientPhone = phoneInput ? phoneInput.value.trim() : '';
+      const clientDate = dateInput ? dateInput.value : '';
+
+      let hasError = false;
+
+      // 1. Validate Client Name
+      if (!clientName) {
+        if (nameError) {
+          nameError.textContent = 'Please enter the client’s name.';
+          nameError.classList.add('visible');
+        }
+        if (nameInput) nameInput.focus();
+        hasError = true;
+      }
+
+      // 2. Validate Client Phone
+      if (!clientPhone) {
+        if (phoneError) {
+          phoneError.textContent = 'Please enter a phone number.';
+          phoneError.classList.add('visible');
+        }
+        if (!hasError && phoneInput) phoneInput.focus();
+        hasError = true;
+      }
+
+      // 3. Strict Date Range Validation (even if manually entered)
+      const { minDateStr, maxDateStr } = getBookingDateRange();
+      if (!clientDate || clientDate < minDateStr || clientDate > maxDateStr) {
+        if (dateError) {
+          dateError.textContent = 'Please select a valid date between today and 30 days from today.';
+          dateError.classList.add('visible');
+        }
+        if (!hasError && dateInput) dateInput.focus();
+        hasError = true;
+      }
+
+      // 4. Validate Service & Time Selection
+      if (!clientSelection.serviceId) {
+        showToast('Please choose a service.', 'error');
+        hasError = true;
+      }
+
+      if (!clientSelection.timeSlot) {
+        showToast('Please choose an available appointment time.', 'error');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const service = appState.services.find(s => s.id === clientSelection.serviceId);
+      if (!service) return;
+
+      // Resolve Assigned Barber if 'ANY'
+      let assignedBarberId = clientSelection.barberId;
+      if (assignedBarberId === 'ANY') {
+        const { slotMap } = getAvailableSlotsForAnyBarber(clientDate, service.duration);
+        const freeBarbers = slotMap.get(clientSelection.timeSlot) || [];
+        if (freeBarbers.length === 0) {
+          showToast('This barber is already booked during that time. Choose another slot.', 'error');
+          recalculateClientTimeSlots();
+          return;
+        }
+        assignedBarberId = freeBarbers[0];
+      }
+
+      // STRICT PRE-SAVE COLLISION VERIFICATION
+      const isFree = isSlotAvailable(assignedBarberId, clientDate, clientSelection.timeSlot, service.duration);
+      if (!isFree) {
+        showToast('This barber is already booked during that time. Choose another slot.', 'error');
+        recalculateClientTimeSlots();
+        return;
+      }
+
+      const assignedBarber = appState.barbers.find(b => b.id === assignedBarberId);
+      const startMins = timeToMinutes(clientSelection.timeSlot);
+      const endMins = startMins + service.duration;
+      const endTimeStr = minutesToTime(endMins);
+
+      // Snapshot preservation
+      const newAppt = {
+        id: 'apt-' + Date.now(),
+        clientName: clientName,
+        clientPhone: clientPhone,
+        barberId: assignedBarberId,
+        serviceId: service.id,
+        serviceName: service.name,
+        price: service.price,
+        duration: service.duration,
+        date: clientDate,
+        startTime: clientSelection.timeSlot,
+        endTime: endTimeStr,
+        status: 'Scheduled',
+        createdAt: new Date().toISOString()
+      };
+
+      appState.appointments.push(newAppt);
+      saveState();
+
+      // Show Confirmation Card
+      displayBookingConfirmation(newAppt, assignedBarber);
+      showToast('Appointment booked successfully!', 'success');
+
+      refreshOwnerViewData();
+    }
+
+    function displayBookingConfirmation(appt, barber) {
+      document.getElementById('client-booking-flow').style.display = 'none';
+      const confScreen = document.getElementById('client-confirmation-screen');
+      const detailsBox = document.getElementById('confirmed-details-summary');
+
+      detailsBox.innerHTML = `
+        <div class="summary-item">
+          <span class="summary-label">Reference ID</span>
+          <span class="summary-value" style="font-family: monospace;">${appt.id}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Client</span>
+          <span class="summary-value">${escapeHtml(appt.clientName)} &bull; ${escapeHtml(appt.clientPhone)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Barber</span>
+          <span class="summary-value"><strong>${escapeHtml(barber ? barber.name : 'Staff Barber')}</strong></span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Service</span>
+          <span class="summary-value">${escapeHtml(appt.serviceName)} (${appt.duration} min)</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Date</span>
+          <span class="summary-value">${formatDateFriendly(appt.date)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Time</span>
+          <span class="summary-value tabular-nums">${formatTime12h(appt.startTime)} – ${formatTime12h(appt.endTime)}</span>
+        </div>
+        <div class="summary-item" style="border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.25rem;">
+          <span class="summary-label" style="font-weight: 600; color: var(--text-primary);">Total Price</span>
+          <span class="summary-value" style="font-weight: 600; font-size: 1.05rem;">${formatCurrency(appt.price)}</span>
+        </div>
+      `;
+
+      confScreen.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetClientBookingView() {
+      document.getElementById('client-booking-flow').style.display = 'grid';
+      document.getElementById('client-confirmation-screen').style.display = 'none';
+
+      document.getElementById('client-input-name').value = '';
+      document.getElementById('client-input-phone').value = '';
+      clientSelection.timeSlot = null;
+
+      initClientBookingFlow();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --------------------------------------------------------------------------
+       5. OWNER VIEW CONTROLLER
+       -------------------------------------------------------------------------- */
+
+    let currentOwnerTab = 'dashboard';
+
+    function switchOwnerTab(tabName) {
+      currentOwnerTab = tabName;
+      document.querySelectorAll('.owner-tabs-nav .owner-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('#view-owner .tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      const btn = document.getElementById(`btn-owner-tab-${tabName}`);
+      const panel = document.getElementById(`owner-panel-${tabName}`);
+
+      if (btn) btn.classList.add('active');
+      if (panel) panel.classList.add('active');
+
+      if (tabName === 'dashboard') renderOwnerDashboard();
+      if (tabName === 'appointments') renderAppointmentsTable();
+      if (tabName === 'settings') renderSettingsTables();
+      if (tabName === 'performance') renderMonthlyPerformance();
+    }
+
+    function refreshOwnerViewData() {
+      if (currentOwnerTab === 'dashboard') renderOwnerDashboard();
+      if (currentOwnerTab === 'appointments') renderAppointmentsTable();
+      if (currentOwnerTab === 'performance') renderMonthlyPerformance();
+    }
+
+    /**
+     * OWNER TAB 1: DASHBOARD SCHEDULE
+     */
+    function renderOwnerDashboard() {
+      const todayStr = formatLocalDate(new Date());
+
+      // KPIs
+      const todayAppts = appState.appointments.filter(a => a.date === todayStr);
+      const totalToday = todayAppts.filter(a => a.status !== 'Cancelled').length;
+
+      const completedToday = todayAppts.filter(a => a.status === 'Completed');
+      const completedCount = completedToday.length;
+      const completedRevenue = completedToday.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+
+      let totalRemainingSlots = 0;
+      appState.barbers.filter(b => b.active).forEach(barber => {
+        const slots = getAvailableSlotsForBarber(barber.id, todayStr, 30);
+        totalRemainingSlots += slots.length;
+      });
+
+      document.getElementById('metric-today-total').textContent = totalToday;
+      document.getElementById('metric-today-available').textContent = totalRemainingSlots;
+      document.getElementById('metric-today-completed').textContent = completedCount;
+      document.getElementById('metric-today-revenue').textContent = formatCurrency(completedRevenue);
+
+      // Selected date schedule
+      const datePicker = document.getElementById('owner-schedule-date-picker');
+      if (!datePicker.value) {
+        datePicker.value = todayStr;
+      }
+      const selectedDate = datePicker.value;
+
+      const container = document.getElementById('barber-columns-wrapper');
+      if (!container) return;
+
+      if (appState.barbers.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">No staff barbers configured.</div>`;
+        return;
+      }
+
+      container.innerHTML = appState.barbers.map(barber => {
+        const isWorkingToday = barber.workDays.includes(getDayOfWeek(selectedDate));
+        const barberAppts = appState.appointments
+          .filter(a => a.barberId === barber.id && a.date === selectedDate)
+          .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+        let cardsHtml = '';
+
+        if (!barber.active) {
+          cardsHtml = `<div class="empty-state">Inactive barber</div>`;
+        } else if (!isWorkingToday) {
+          cardsHtml = `<div class="empty-state">Off shift (non-working day)</div>`;
+        } else if (barberAppts.length === 0) {
+          cardsHtml = `<div class="empty-state">No appointments booked</div>`;
+        } else {
+          cardsHtml = barberAppts.map(a => `
+            <div class="appointment-item-card">
+              <div class="appointment-item-time">
+                <span>${formatTime12h(a.startTime)} – ${formatTime12h(a.endTime)}</span>
+                <span class="badge badge-${a.status.toLowerCase()}">${a.status}</span>
+              </div>
+              <div class="appointment-item-client">${escapeHtml(a.clientName)}</div>
+              <div class="appointment-item-meta">
+                <span>${escapeHtml(a.serviceName)} (${a.duration}m)</span>
+                <strong class="tabular-nums">${formatCurrency(a.price)}</strong>
+              </div>
+              <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
+                ${a.status === 'Scheduled' ? `
+                  <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.78rem;" onclick="setAppointmentStatus('${a.id}', 'Completed')">Complete</button>
+                  <button class="btn btn-secondary btn-sm" style="font-size: 0.78rem;" onclick="setAppointmentStatus('${a.id}', 'No-show')">No-show</button>
+                ` : ''}
+                <button class="btn btn-secondary btn-sm" style="font-size: 0.78rem;" onclick="openEditAppointmentModal('${a.id}')">Edit</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        return `
+          <div class="barber-roster-column">
+            <div class="barber-roster-header">
+              <div>
+                <strong style="font-size: 0.95rem;">${escapeHtml(barber.name)}</strong>
+                <div style="font-size: 0.78rem; color: var(--text-secondary);">
+                  ${formatTime12h(barber.startTime)} – ${formatTime12h(barber.endTime)}
+                  ${barber.breakStart ? `(Break: ${formatTime12h(barber.breakStart)})` : ''}
+                </div>
+              </div>
+              <span class="badge ${barber.active ? 'badge-active' : 'badge-inactive'}">
+                ${barber.active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            <div class="barber-roster-body">
+              ${cardsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setDashboardScheduleToday() {
+      const todayStr = formatLocalDate(new Date());
+      const datePicker = document.getElementById('owner-schedule-date-picker');
+      if (datePicker) {
+        datePicker.value = todayStr;
+        renderOwnerDashboard();
+      }
+    }
+
+    /**
+     * OWNER TAB 2: APPOINTMENTS TABLE
+     */
+    function renderAppointmentsTable() {
+      const searchInput = document.getElementById('filter-input-search');
+      const barberSelect = document.getElementById('filter-select-barber');
+      const statusSelect = document.getElementById('filter-select-status');
+      const dateInput = document.getElementById('filter-input-date');
+
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const selectedBarber = barberSelect ? barberSelect.value : 'ALL';
+      const selectedStatus = statusSelect ? statusSelect.value : 'ALL';
+      const selectedDate = dateInput ? dateInput.value : '';
+
+      // Populate barber filter if needed
+      if (barberSelect && barberSelect.options.length <= 1) {
+        barberSelect.innerHTML = '<option value="ALL">All barbers</option>' +
+          appState.barbers.map(b => `<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
+      }
+
+      const filtered = appState.appointments.filter(a => {
+        if (searchTerm && !a.clientName.toLowerCase().includes(searchTerm)) return false;
+        if (selectedBarber !== 'ALL' && a.barberId !== selectedBarber) return false;
+        if (selectedStatus !== 'ALL' && a.status !== selectedStatus) return false;
+        if (selectedDate && a.date !== selectedDate) return false;
+        return true;
+      }).sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return timeToMinutes(b.startTime) - timeToMinutes(a.startTime);
+      });
+
+      const tbody = document.getElementById('appointments-tbody');
+      if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No matching appointments found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(a => {
+        const barber = appState.barbers.find(b => b.id === a.barberId);
+        const barberName = barber ? barber.name : 'Unknown';
+
+        return `
+          <tr>
+            <td>
+              <strong>${formatDateFriendly(a.date)}</strong>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);" class="tabular-nums">
+                ${formatTime12h(a.startTime)} – ${formatTime12h(a.endTime)}
+              </div>
+            </td>
+            <td>
+              <div><strong>${escapeHtml(a.clientName)}</strong></div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">${escapeHtml(a.clientPhone)}</div>
+            </td>
+            <td>${escapeHtml(barberName)}</td>
+            <td>
+              <div>${escapeHtml(a.serviceName)}</div>
+              <div style="font-size: 0.82rem; font-weight: 500;" class="tabular-nums">
+                ${formatCurrency(a.price)} &bull; ${a.duration}m
+              </div>
+            </td>
+            <td>
+              <select class="form-control" style="min-height: 32px; padding: 0.2rem 0.5rem; font-size: 0.82rem;" onchange="setAppointmentStatus('${a.id}', this.value)">
+                <option value="Scheduled" ${a.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option>
+                <option value="Completed" ${a.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                <option value="Cancelled" ${a.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                <option value="No-show" ${a.status === 'No-show' ? 'selected' : ''}>No-show</option>
+              </select>
+            </td>
+            <td style="text-align: right;">
+              <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+                <button class="btn btn-secondary btn-sm" onclick="openEditAppointmentModal('${a.id}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmCancelAppointment('${a.id}')">Cancel</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetAppointmentFilters() {
+      document.getElementById('filter-input-search').value = '';
+      document.getElementById('filter-select-barber').value = 'ALL';
+      document.getElementById('filter-select-status').value = 'ALL';
+      document.getElementById('filter-input-date').value = '';
+      renderAppointmentsTable();
+    }
+
+    function setAppointmentStatus(apptId, newStatus) {
+      const appt = appState.appointments.find(a => a.id === apptId);
+      if (appt) {
+        appt.status = newStatus;
+        saveState();
+        showToast(`Status updated to ${newStatus}.`, 'success');
+        refreshOwnerViewData();
+      }
+    }
+
+    function confirmCancelAppointment(apptId) {
+      const appt = appState.appointments.find(a => a.id === apptId);
+      if (!appt) return;
+
+      openConfirmModal(
+        'Cancel appointment',
+        `Cancel appointment for ${escapeHtml(appt.clientName)} on ${formatDateFriendly(appt.date)} at ${formatTime12h(appt.startTime)}? The slot will immediately open for other clients.`,
+        () => {
+          appt.status = 'Cancelled';
+          saveState();
+          showToast('Appointment cancelled.', 'success');
+          refreshOwnerViewData();
+        }
+      );
+    }
+
+    /**
+     * OWNER TAB 3: BARBERS & SERVICES SETTINGS
+     */
+    function renderSettingsTables() {
+      // Barbers Table
+      const bTbody = document.getElementById('barbers-settings-tbody');
+      if (bTbody) {
+        if (appState.barbers.length === 0) {
+          bTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">No barbers in roster.</td></tr>`;
+        } else {
+          const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          bTbody.innerHTML = appState.barbers.map(b => {
+            const daysStr = b.workDays.map(d => daysMap[d]).join(', ');
+            const shiftStr = `${formatTime12h(b.startTime)} – ${formatTime12h(b.endTime)}`;
+            const breakStr = b.breakStart && b.breakEnd ? `${formatTime12h(b.breakStart)} – ${formatTime12h(b.breakEnd)}` : 'None';
+
+            return `
+              <tr>
+                <td><strong>${escapeHtml(b.name)}</strong></td>
+                <td>
+                  <span class="badge ${b.active ? 'badge-active' : 'badge-inactive'}">
+                    ${b.active ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td>${daysStr}</td>
+                <td class="tabular-nums">${shiftStr}</td>
+                <td class="tabular-nums">${breakStr}</td>
+                <td style="text-align: right;">
+                  <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary btn-sm" onclick="openEditBarberModal('${b.id}')">Edit</button>
+                    <button class="btn btn-secondary btn-sm" onclick="toggleBarberActive('${b.id}')">
+                      ${b.active ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Services Table
+      const sTbody = document.getElementById('services-settings-tbody');
+      if (sTbody) {
+        if (appState.services.length === 0) {
+          sTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No services offered.</td></tr>`;
+        } else {
+          sTbody.innerHTML = appState.services.map(s => `
+            <tr>
+              <td><strong>${escapeHtml(s.name)}</strong></td>
+              <td>${s.duration} minutes</td>
+              <td><strong class="tabular-nums">${formatCurrency(s.price)}</strong></td>
+              <td style="text-align: right;">
+                <button class="btn btn-secondary btn-sm" onclick="openEditServiceModal('${s.id}')">Edit</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function toggleBarberActive(barberId) {
+      const b = appState.barbers.find(barber => barber.id === barberId);
+      if (b) {
+        b.active = !b.active;
+        saveState();
+        showToast(`${b.name} is now ${b.active ? 'Active' : 'Inactive'}.`, 'success');
+        renderSettingsTables();
+        renderOwnerDashboard();
+        renderClientBarbers();
+      }
+    }
+
+    /**
+     * OWNER TAB 4: MONTHLY PERFORMANCE REPORTING
+     */
+    function renderMonthlyPerformance() {
+      const monthInput = document.getElementById('perf-month-picker');
+      if (!monthInput.value) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        monthInput.value = `${y}-${m}`;
+      }
+
+      const selectedMonth = monthInput.value;
+      const tbody = document.getElementById('performance-table-tbody');
+      const chartContainer = document.getElementById('perf-svg-chart-container');
+
+      const monthAppts = appState.appointments.filter(a => a.date.startsWith(selectedMonth));
+
+      if (appState.barbers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No barber staff records.</td></tr>`;
+        chartContainer.innerHTML = `<div class="empty-state">No barber data to chart.</div>`;
+        return;
+      }
+
+      let grandCompleted = 0;
+      let grandCancelled = 0;
+      let grandNoShow = 0;
+      let grandMinutes = 0;
+      let grandRevenue = 0;
+
+      const barberStats = appState.barbers.map(barber => {
+        const bAppts = monthAppts.filter(a => a.barberId === barber.id);
+        const completed = bAppts.filter(a => a.status === 'Completed');
+        const cancelled = bAppts.filter(a => a.status === 'Cancelled').length;
+        const noshow = bAppts.filter(a => a.status === 'No-show').length;
+
+        const rev = completed.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+        const mins = completed.reduce((sum, a) => sum + (Number(a.duration) || 0), 0);
+
+        grandCompleted += completed.length;
+        grandCancelled += cancelled;
+        grandNoShow += noshow;
+        grandMinutes += mins;
+        grandRevenue += rev;
+
+        return {
+          barber,
+          completedCount: completed.length,
+          cancelledCount: cancelled,
+          noShowCount: noshow,
+          totalMinutes: mins,
+          grossRevenue: rev
+        };
+      });
+
+      let rowsHtml = barberStats.map(stat => {
+        const hrs = (stat.totalMinutes / 60).toFixed(1);
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(stat.barber.name)}</strong>
+              ${!stat.barber.active ? '<span class="badge badge-inactive" style="margin-left: 0.35rem;">Inactive</span>' : ''}
+            </td>
+            <td class="tabular-nums">${stat.completedCount}</td>
+            <td class="tabular-nums" style="color: #991B1B;">${stat.cancelledCount}</td>
+            <td class="tabular-nums" style="color: #92600E;">${stat.noShowCount}</td>
+            <td class="tabular-nums">${hrs} hrs</td>
+            <td style="text-align: right;" class="tabular-nums"><strong>${formatCurrency(stat.grossRevenue)}</strong></td>
+          </tr>
+        `;
+      }).join('');
+
+      // Totals Row
+      rowsHtml += `
+        <tr style="background-color: var(--bg-surface-subtle); font-weight: 600; border-top: 1px solid var(--border-color);">
+          <td>Total</td>
+          <td class="tabular-nums">${grandCompleted}</td>
+          <td class="tabular-nums" style="color: #991B1B;">${grandCancelled}</td>
+          <td class="tabular-nums" style="color: #92600E;">${grandNoShow}</td>
+          <td class="tabular-nums">${(grandMinutes / 60).toFixed(1)} hrs</td>
+          <td style="text-align: right;" class="tabular-nums"><strong>${formatCurrency(grandRevenue)}</strong></td>
+        </tr>
+      `;
+
+      tbody.innerHTML = rowsHtml;
+
+      renderPerformanceChartSvg(barberStats, chartContainer);
+    }
+
+    function renderPerformanceChartSvg(barberStats, container) {
+      if (barberStats.length === 0) {
+        container.innerHTML = `<div class="empty-state">No performance data.</div>`;
+        return;
+      }
+
+      const maxRev = Math.max(...barberStats.map(s => s.grossRevenue), 100);
+      const svgHeight = 200;
+      const padBottom = 35;
+      const padTop = 25;
+      const chartH = svgHeight - padBottom - padTop;
+
+      const barW = 44;
+      const gap = 36;
+      const svgW = Math.max(460, (barW + gap) * barberStats.length + 50);
+
+      let barsSvg = '';
+
+      barberStats.forEach((stat, idx) => {
+        const x = 40 + idx * (barW + gap);
+        const barH = (stat.grossRevenue / maxRev) * chartH;
+        const y = svgHeight - padBottom - barH;
+
+        barsSvg += `
+          <g>
+            <rect x="${x}" y="${padTop}" width="${barW}" height="${chartH}" fill="#F1EFEA" rx="4"></rect>
+            <rect x="${x}" y="${y}" width="${barW}" height="${Math.max(barH, 3)}" fill="#244A3A" rx="4"></rect>
+            <text x="${x + barW / 2}" y="${y - 6}" text-anchor="middle" fill="#202722" font-size="11" font-weight="600" class="tabular-nums">
+              ${formatCurrency(stat.grossRevenue)}
+            </text>
+            <text x="${x + barW / 2}" y="${svgHeight - 12}" text-anchor="middle" fill="#5F6862" font-size="11">
+              ${escapeHtml(stat.barber.name.split(' ')[0])}
+            </text>
+          </g>
+        `;
+      });
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${svgW} ${svgHeight}" class="chart-svg-box" preserveAspectRatio="xMidYMid meet">
+          <line x1="20" y1="${svgHeight - padBottom}" x2="${svgW - 20}" y2="${svgHeight - padBottom}" stroke="#DEDFD8" stroke-width="1" />
+          ${barsSvg}
+        </svg>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       6. OWNER MODALS & CRUD
+       -------------------------------------------------------------------------- */
+
+    function openCreateAppointmentModal() {
+      document.getElementById('modal-appt-heading').textContent = 'Create appointment';
+      document.getElementById('modal-field-appt-id').value = '';
+      document.getElementById('modal-field-client-name').value = '';
+      document.getElementById('modal-field-client-phone').value = '';
+      document.getElementById('modal-appt-conflict-msg').style.display = 'none';
+      document.getElementById('modal-field-status-group').style.display = 'none';
+
+      populateModalServiceAndBarberSelects();
+
+      const todayStr = formatLocalDate(new Date());
+      document.getElementById('modal-field-date').value = todayStr;
+
+      handleModalBarberOrDateChange();
+      document.getElementById('modal-appt').classList.add('active');
+    }
+
+    function openEditAppointmentModal(apptId) {
+      const appt = appState.appointments.find(a => a.id === apptId);
+      if (!appt) return;
+
+      document.getElementById('modal-appt-heading').textContent = 'Edit / reschedule appointment';
+      document.getElementById('modal-field-appt-id').value = appt.id;
+      document.getElementById('modal-field-client-name').value = appt.clientName;
+      document.getElementById('modal-field-client-phone').value = appt.clientPhone;
+      document.getElementById('modal-appt-conflict-msg').style.display = 'none';
+      document.getElementById('modal-field-status-group').style.display = 'block';
+      document.getElementById('modal-field-status').value = appt.status;
+
+      populateModalServiceAndBarberSelects(appt.serviceId, appt.barberId);
+
+      document.getElementById('modal-field-date').value = appt.date;
+      handleModalBarberOrDateChange(appt.id, appt.startTime);
+
+      document.getElementById('modal-appt').classList.add('active');
+    }
+
+    function closeAppointmentModal() {
+      document.getElementById('modal-appt').classList.remove('active');
+    }
+
+    function populateModalServiceAndBarberSelects(selectedSvcId = null, selectedBarberId = null) {
+      const sSelect = document.getElementById('modal-field-service');
+      const bSelect = document.getElementById('modal-field-barber');
+
+      sSelect.innerHTML = appState.services.map(s => `
+        <option value="${s.id}" ${s.id === selectedSvcId ? 'selected' : ''}>
+          ${escapeHtml(s.name)} (${s.duration}m - ${formatCurrency(s.price)})
+        </option>
+      `).join('');
+
+      bSelect.innerHTML = appState.barbers.map(b => `
+        <option value="${b.id}" ${b.id === selectedBarberId ? 'selected' : ''}>
+          ${escapeHtml(b.name)} ${!b.active ? '(Inactive)' : ''}
+        </option>
+      `).join('');
+    }
+
+    function handleModalServiceChange() {
+      const excludeId = document.getElementById('modal-field-appt-id').value || null;
+      handleModalBarberOrDateChange(excludeId);
+    }
+
+    function handleModalBarberOrDateChange(excludeId = null, preselectedTime = null) {
+      const bId = document.getElementById('modal-field-barber').value;
+      const dateStr = document.getElementById('modal-field-date').value;
+      const sId = document.getElementById('modal-field-service').value;
+      const tSelect = document.getElementById('modal-field-time');
+      const conflictMsg = document.getElementById('modal-appt-conflict-msg');
+
+      if (!excludeId) {
+        excludeId = document.getElementById('modal-field-appt-id').value || null;
+      }
+
+      conflictMsg.style.display = 'none';
+
+      const service = appState.services.find(s => s.id === sId);
+      const barber = appState.barbers.find(b => b.id === bId);
+
+      if (!service || !barber || !dateStr) {
+        tSelect.innerHTML = `<option value="">Select service, barber, & date</option>`;
+        return;
+      }
+
+      const dayOfWeek = getDayOfWeek(dateStr);
+      if (!barber.workDays.includes(dayOfWeek)) {
+        tSelect.innerHTML = `<option value="">Barber does not work on this day</option>`;
+        conflictMsg.textContent = `${barber.name} is not scheduled to work on this day.`;
+        conflictMsg.style.display = 'block';
+        return;
+      }
+
+      const slots = getAvailableSlotsForBarber(barber.id, dateStr, service.duration, excludeId);
+
+      if (slots.length === 0) {
+        tSelect.innerHTML = `<option value="">No open slots available</option>`;
+        conflictMsg.textContent = 'This barber is fully booked or on break during this shift.';
+        conflictMsg.style.display = 'block';
+        return;
+      }
+
+      if (preselectedTime && !slots.includes(preselectedTime)) {
+        slots.unshift(preselectedTime);
+      }
+
+      tSelect.innerHTML = slots.map(t => `
+        <option value="${t}" ${t === preselectedTime ? 'selected' : ''}>
+          ${formatTime12h(t)}
+        </option>
+      `).join('');
+    }
+
+    function handleSaveAppointmentModal(event) {
+      event.preventDefault();
+
+      const apptId = document.getElementById('modal-field-appt-id').value;
+      const clientName = document.getElementById('modal-field-client-name').value.trim();
+      const clientPhone = document.getElementById('modal-field-client-phone').value.trim();
+      const sId = document.getElementById('modal-field-service').value;
+      const bId = document.getElementById('modal-field-barber').value;
+      const dateStr = document.getElementById('modal-field-date').value;
+      const startTime = document.getElementById('modal-field-time').value;
+
+      if (!clientName) {
+        showToast('Please enter the client’s name.', 'error');
+        return;
+      }
+
+      if (!startTime) {
+        showToast('Please select a valid time slot.', 'error');
+        return;
+      }
+
+      const service = appState.services.find(s => s.id === sId);
+      if (!service) return;
+
+      const isFree = isSlotAvailable(bId, dateStr, startTime, service.duration, apptId || null);
+      if (!isFree) {
+        showToast('This barber is already booked during that time. Choose another slot.', 'error');
+        return;
+      }
+
+      const startMins = timeToMinutes(startTime);
+      const endMins = startMins + service.duration;
+      const endTime = minutesToTime(endMins);
+
+      if (apptId) {
+        const appt = appState.appointments.find(a => a.id === apptId);
+        if (appt) {
+          appt.clientName = clientName;
+          appt.clientPhone = clientPhone;
+          appt.barberId = bId;
+          appt.serviceId = service.id;
+          appt.serviceName = service.name;
+          appt.price = service.price;
+          appt.duration = service.duration;
+          appt.date = dateStr;
+          appt.startTime = startTime;
+          appt.endTime = endTime;
+          appt.status = document.getElementById('modal-field-status').value;
+          showToast('Appointment updated.', 'success');
+        }
+      } else {
+        const newAppt = {
+          id: 'apt-' + Date.now(),
+          clientName,
+          clientPhone,
+          barberId: bId,
+          serviceId: service.id,
+          serviceName: service.name,
+          price: service.price,
+          duration: service.duration,
+          date: dateStr,
+          startTime,
+          endTime,
+          status: 'Scheduled',
+          createdAt: new Date().toISOString()
+        };
+        appState.appointments.push(newAppt);
+        showToast('Appointment created.', 'success');
+      }
+
+      saveState();
+      closeAppointmentModal();
+      refreshOwnerViewData();
+    }
+
+    // Barber Modal
+    function openAddBarberModal() {
+      document.getElementById('modal-barber-heading').textContent = 'Add barber';
+      document.getElementById('modal-field-barber-id').value = '';
+      document.getElementById('modal-field-barber-name').value = '';
+      document.getElementById('modal-field-barber-start').value = '09:00';
+      document.getElementById('modal-field-barber-end').value = '17:00';
+      document.getElementById('modal-field-barber-bstart').value = '12:00';
+      document.getElementById('modal-field-barber-bend').value = '13:00';
+      document.getElementById('modal-field-barber-active').checked = true;
+
+      document.querySelectorAll('#form-barber-modal input[name="workday"]').forEach(cb => {
+        cb.checked = ['1', '2', '3', '4', '5'].includes(cb.value);
+      });
+
+      document.getElementById('modal-barber').classList.add('active');
+    }
+
+    function openEditBarberModal(barberId) {
+      const b = appState.barbers.find(barber => barber.id === barberId);
+      if (!b) return;
+
+      document.getElementById('modal-barber-heading').textContent = 'Edit barber profile';
+      document.getElementById('modal-field-barber-id').value = b.id;
+      document.getElementById('modal-field-barber-name').value = b.name;
+      document.getElementById('modal-field-barber-start').value = b.startTime;
+      document.getElementById('modal-field-barber-end').value = b.endTime;
+      document.getElementById('modal-field-barber-bstart').value = b.breakStart || '';
+      document.getElementById('modal-field-barber-bend').value = b.breakEnd || '';
+      document.getElementById('modal-field-barber-active').checked = b.active;
+
+      document.querySelectorAll('#form-barber-modal input[name="workday"]').forEach(cb => {
+        cb.checked = b.workDays.includes(Number(cb.value));
+      });
+
+      document.getElementById('modal-barber').classList.add('active');
+    }
+
+    function closeBarberModal() {
+      document.getElementById('modal-barber').classList.remove('active');
+    }
+
+    function handleSaveBarberModal(event) {
+      event.preventDefault();
+
+      const bId = document.getElementById('modal-field-barber-id').value;
+      const name = document.getElementById('modal-field-barber-name').value.trim();
+      const startTime = document.getElementById('modal-field-barber-start').value;
+      const endTime = document.getElementById('modal-field-barber-end').value;
+      const breakStart = document.getElementById('modal-field-barber-bstart').value;
+      const breakEnd = document.getElementById('modal-field-barber-bend').value;
+      const active = document.getElementById('modal-field-barber-active').checked;
+
+      const checkedDays = Array.from(document.querySelectorAll('#form-barber-modal input[name="workday"]:checked'))
+        .map(cb => Number(cb.value));
+
+      if (!name) {
+        showToast('Please enter the barber’s name.', 'error');
+        return;
+      }
+
+      if (checkedDays.length === 0) {
+        showToast('Please select at least one working day.', 'error');
+        return;
+      }
+
+      if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
+        showToast('Shift start time must be before shift end time.', 'error');
+        return;
+      }
+
+      if (bId) {
+        const b = appState.barbers.find(barber => barber.id === bId);
+        if (b) {
+          b.name = name;
+          b.startTime = startTime;
+          b.endTime = endTime;
+          b.breakStart = breakStart;
+          b.breakEnd = breakEnd;
+          b.workDays = checkedDays;
+          b.active = active;
+          showToast('Barber profile updated.', 'success');
+        }
+      } else {
+        appState.barbers.push({
+          id: 'b-' + Date.now(),
+          name,
+          startTime,
+          endTime,
+          breakStart,
+          breakEnd,
+          workDays: checkedDays,
+          active
+        });
+        showToast('New barber added.', 'success');
+      }
+
+      saveState();
+      closeBarberModal();
+      renderSettingsTables();
+      renderOwnerDashboard();
+      renderClientBarbers();
+    }
+
+    // Service Modal
+    function openAddServiceModal() {
+      document.getElementById('modal-service-heading').textContent = 'Add service';
+      document.getElementById('modal-field-service-id').value = '';
+      document.getElementById('modal-field-service-name').value = '';
+      document.getElementById('modal-field-service-duration').value = '30';
+      document.getElementById('modal-field-service-price').value = '35.00';
+      document.getElementById('modal-service').classList.add('active');
+    }
+
+    function openEditServiceModal(serviceId) {
+      const s = appState.services.find(svc => svc.id === serviceId);
+      if (!s) return;
+
+      document.getElementById('modal-service-heading').textContent = 'Edit service';
+      document.getElementById('modal-field-service-id').value = s.id;
+      document.getElementById('modal-field-service-name').value = s.name;
+      document.getElementById('modal-field-service-duration').value = String(s.duration);
+      document.getElementById('modal-field-service-price').value = s.price.toFixed(2);
+      document.getElementById('modal-service').classList.add('active');
+    }
+
+    function closeServiceModal() {
+      document.getElementById('modal-service').classList.remove('active');
+    }
+
+    function handleSaveServiceModal(event) {
+      event.preventDefault();
+
+      const sId = document.getElementById('modal-field-service-id').value;
+      const name = document.getElementById('modal-field-service-name').value.trim();
+      const duration = Number(document.getElementById('modal-field-service-duration').value);
+      const price = Number(document.getElementById('modal-field-service-price').value);
+
+      if (!name) {
+        showToast('Please enter a service name.', 'error');
+        return;
+      }
+
+      if (sId) {
+        const s = appState.services.find(svc => svc.id === sId);
+        if (s) {
+          s.name = name;
+          s.duration = duration;
+          s.price = price;
+          showToast('Service updated.', 'success');
+        }
+      } else {
+        appState.services.push({
+          id: 's-' + Date.now(),
+          name,
+          duration,
+          price
+        });
+        showToast('New service added.', 'success');
+      }
+
+      saveState();
+      closeServiceModal();
+      renderSettingsTables();
+      renderClientServices();
+    }
+
+    // Confirm Modal
+    function openConfirmModal(title, message, onProceed) {
+      document.getElementById('modal-confirm-heading').textContent = title;
+      document.getElementById('modal-confirm-msg').textContent = message;
+      confirmCallback = onProceed;
+
+      document.getElementById('modal-confirm-proceed-btn').onclick = function() {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+
+      document.getElementById('modal-confirm').classList.add('active');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('modal-confirm').classList.remove('active');
+      confirmCallback = null;
+    }
+
+    /* --------------------------------------------------------------------------
+       7. DATA BACKUP, EXPORT, IMPORT & DEMO TOOLS
+       -------------------------------------------------------------------------- */
+
+    function exportDataToJson() {
+      try {
+        const jsonStr = JSON.stringify(appState, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = formatLocalDate(new Date());
+        a.href = url;
+        a.download = `barberbook-backup-${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Backup exported.', 'success');
+      } catch (err) {
+        showToast('Export failed.', 'error');
+      }
+    }
+
+    function handleImportJsonFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (
+            parsed && 
+            Array.isArray(parsed.barbers) && 
+            Array.isArray(parsed.services) && 
+            Array.isArray(parsed.appointments)
+          ) {
+            openConfirmModal(
+              'Import backup file',
+              `Replace current data with ${parsed.barbers.length} barbers, ${parsed.services.length} services, and ${parsed.appointments.length} appointments from this file?`,
+              () => {
+                appState = parsed;
+                saveState();
+                showToast('Backup restored successfully!', 'success');
+                refreshOwnerViewData();
+                initClientBookingFlow();
+              }
+            );
+          } else {
+            showToast('Invalid backup file structure.', 'error');
+          }
+        } catch (err) {
+          showToast('Could not parse JSON file.', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function confirmLoadDemoData() {
+      openConfirmModal(
+        'Load sample demo data',
+        'Populate 3 barbers, 5 services, and realistic appointments relative to today? Existing browser data will be replaced.',
+        () => {
+          initDefaultData();
+          showToast('Sample demo data loaded!', 'success');
+          refreshOwnerViewData();
+          initClientBookingFlow();
+        }
+      );
+    }
+
+    function confirmResetAllData() {
+      openConfirmModal(
+        'Reset all shop data',
+        'Warning: Permanently delete all saved appointments, barbers, and services in this browser? This action cannot be undone.',
+        () => {
+          appState = {
+            barbers: [],
+            services: [],
+            appointments: []
+          };
+          saveState();
+          showToast('All local records cleared.', 'warning');
+          refreshOwnerViewData();
+          initClientBookingFlow();
+        }
+      );
+    }
+
+    /* --------------------------------------------------------------------------
+       8. VIEW SWITCHER & TOAST SYSTEM
+       -------------------------------------------------------------------------- */
+
+    function switchMainView(viewName) {
+      const clientView = document.getElementById('view-client');
+      const ownerView = document.getElementById('view-owner');
+      const clientBtn = document.getElementById('nav-btn-client');
+      const ownerBtn = document.getElementById('nav-btn-owner');
+
+      if (viewName === 'client') {
+        clientView.style.display = 'block';
+        ownerView.style.display = 'none';
+        clientBtn.classList.add('active');
+        ownerBtn.classList.remove('active');
+        initClientBookingFlow();
+      } else {
+        clientView.style.display = 'none';
+        ownerView.style.display = 'block';
+        clientBtn.classList.remove('active');
+        ownerBtn.classList.add('active');
+        switchOwnerTab(currentOwnerTab);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const tray = document.getElementById('toast-tray');
+      if (!tray) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast-msg ${type}`;
+      toast.textContent = message;
+
+      tray.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        setTimeout(() => toast.remove(), 200);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* --------------------------------------------------------------------------
+       9. INITIALIZATION
+       -------------------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initClientBookingFlow();
+      updateStorageStatusIndicator();
+    });
+  </script>
+</body>
+</html>
